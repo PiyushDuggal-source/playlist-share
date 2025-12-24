@@ -1,0 +1,37 @@
+# Project Tasks: Academic Playlist Share Platform
+
+## 1. Project Setup & Architecture
+- [x] 1.1. Define TypeScript interfaces for the data model (User, Subject, Playlist, PlaylistItem).
+- [x] 1.2. Install necessary dependencies (firebase, clsx, tailwind-merge, lucide-react).
+
+## 2. Firebase Configuration
+- [x] 2.1. Create `lib/firebase/config.ts` to initialize Firebase App, Auth, and Firestore.
+- [x] 2.2. Create `lib/firebase/auth.ts` for authentication logic (Google Sign-in with domain restriction).
+- [x] 2.3. Create `lib/firebase/firestore.ts` for data access helper functions.
+
+## 3. Components - UI Foundation
+- [x] 3.1. Create a Navbar component (Logo, Auth Status).
+- [x] 3.2. Create basic UI components (Button, Card, Badge).
+
+## 4. Pages & Routing - Read Views
+- [x] 4.1. Implement Homepage (`/`) - Fetch and display list of subjects.
+- [x] 4.2. Implement Subject Page (`/subject/[subjectId]`) - List playlists for a subject.
+- [x] 4.3. Implement Playlist Page (`/playlist/[playlistId]`) - View playlist details and items.
+
+## 5. Feature - Create & Edit Playlist
+- [x] 5.1. Create "Create Playlist" page/form (`/playlist/create`).
+- [x] 5.2. Implement form state for playlist metadata and items list (add/remove/reorder).
+- [x] 5.3. Implement Firestore write logic for creating/updating playlists.
+- [x] 5.4. Add "Edit" functionality (restricted to owner).
+
+## 6. Firestore Security Rules
+- [x] 6.1. Create `firestore.rules` file with security logic (public read, restricted write).
+
+## 7. Refinement & Polish
+- [x] 7.1. Add Loading and Empty states.
+- [x] 7.2. Final review of UI/UX and responsiveness.
+
+## 8. Architecture Update: Playlists as Courses
+- [x] 8.1. Collapse Subjects into Playlists (single course entity) and remove subject selection.
+- [x] 8.2. Update data model to use playlist name as course name; adjust queries and pages.
+- [x] 8.3. Add Profile page for students to CRUD their playlists.
