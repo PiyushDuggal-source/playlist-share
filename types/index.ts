@@ -14,6 +14,7 @@ export interface Playlist {
   description: string;
   authorId: string;
   authorName: string;
+  authorLevel?: number;
   items: PlaylistItem[];
   likes?: number;
   likedBy?: string[];
@@ -26,4 +27,8 @@ export interface UserProfile {
   email: string;
   displayName: string;
   photoURL?: string;
+  level?: number; // 1-4
+  subjects?: string[]; // max 4
+  projects?: string[]; // max 4
+  bio?: string;
 }

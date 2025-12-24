@@ -94,7 +94,22 @@ export default function PlaylistsPage() {
                     <Badge variant="secondary">
                       {playlist.items?.length || 0} items
                     </Badge>
-                    <Badge variant="outline">By {playlist.authorName}</Badge>
+                    <Link
+                      href={`/users/${playlist.authorId}`}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Badge
+                        variant="outline"
+                        className="hover:bg-slate-100 transition-colors"
+                      >
+                        By {playlist.authorName}
+                        {playlist.authorLevel && (
+                          <span className="ml-1.5 inline-flex items-center justify-center bg-slate-100 text-slate-600 rounded-full h-4 w-4 text-[10px] -mr-1">
+                            {playlist.authorLevel}
+                          </span>
+                        )}
+                      </Badge>
+                    </Link>
                     {playlist.likes !== undefined && (
                       <div className="flex items-center gap-1 ml-auto text-slate-500">
                         <div onClick={(e) => e.preventDefault()}>

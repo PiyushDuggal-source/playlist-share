@@ -14,6 +14,7 @@ import { LikeButton } from "@/components/LikeButton";
 import { ShareButton } from "@/components/ShareButton";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/Badge";
+import Link from "next/link";
 
 export function PlaylistDetails({ playlist }: { playlist: Playlist }) {
   return (
@@ -44,7 +45,17 @@ export function PlaylistDetails({ playlist }: { playlist: Playlist }) {
               <div className="h-6 w-6 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600">
                 {playlist.authorName?.charAt(0).toUpperCase()}
               </div>
-              <span className="font-medium">By {playlist.authorName}</span>
+              <Link
+                href={`/users/${playlist.authorId}`}
+                className="font-medium hover:text-indigo-600 hover:underline flex items-center gap-1"
+              >
+                By {playlist.authorName}
+                {playlist.authorLevel && (
+                  <span className="inline-flex items-center justify-center bg-slate-100 text-slate-600 rounded-full h-4 w-4 text-[10px]">
+                    {playlist.authorLevel}
+                  </span>
+                )}
+              </Link>
               <span>•</span>
               <span>{playlist.items?.length || 0} items</span>
             </div>

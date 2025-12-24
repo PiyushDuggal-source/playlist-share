@@ -6,7 +6,11 @@ import { Playlist, PlaylistItem, PlaylistItemType } from "@/types";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Trash2, GripVertical, Plus } from "lucide-react";
-import { createPlaylist, updatePlaylist } from "@/lib/firebase/firestore";
+import {
+  createPlaylist,
+  updatePlaylist,
+  getUserProfile,
+} from "@/lib/firebase/firestore";
 import { useAuth } from "@/hooks/useAuth";
 
 interface PlaylistFormProps {
@@ -58,12 +62,16 @@ export function PlaylistForm({ initialData }: PlaylistFormProps) {
 
     setLoading(true);
     try {
+      // Fetch user profile to get the level
+      const userProfile = await getUserProfile(user.uid);
+
       const playlistData = {
         name,
         description,
         items,
         authorId: user.uid,
         authorName: user.displayName || "Anonymous",
+        authorLevel: userProfile?.level || 1,
       };
 
       if (initialData) {

@@ -124,7 +124,7 @@ function Hero({ userLoggedIn }: { userLoggedIn: boolean }) {
           >
             Start a playlist
           </AuthGateButton>
-          <Link href="#featured">
+          <Link href="/playlists">
             <Button
               size="lg"
               variant="outline"
@@ -291,9 +291,18 @@ function FeaturedPlaylists({
                       {playlist.items?.length || 0} items
                     </Badge>
                     <span className="text-xs text-slate-400">•</span>
-                    <span className="text-xs font-medium text-slate-500">
+                    <Link
+                      href={`/users/${playlist.authorId}`}
+                      className="text-xs font-medium text-slate-500 hover:text-indigo-600 hover:underline flex items-center gap-1"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       By {playlist.authorName}
-                    </span>
+                      {playlist.authorLevel && (
+                        <span className="inline-flex items-center justify-center bg-slate-100 text-slate-600 rounded-full h-4 w-4 text-[10px]">
+                          {playlist.authorLevel}
+                        </span>
+                      )}
+                    </Link>
                     {playlist.likes !== undefined && (
                       <div className="flex items-center gap-1 ml-auto text-slate-500">
                         <Heart className="h-3 w-3 fill-slate-300 text-slate-400" />
