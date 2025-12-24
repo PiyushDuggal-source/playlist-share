@@ -6,10 +6,23 @@ import { useAuth } from "@/hooks/useAuth";
 import { signInWithGoogle, signOut } from "@/lib/firebase/auth";
 import { Button } from "@/components/ui/Button";
 import { LogOut, User as UserIcon, Menu, X } from "lucide-react";
+import { OrgRestrictionModal } from "@/components/AuthGateButton";
 
 export function Navbar() {
   const { user, loading } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+  const [showRestriction, setShowRestriction] = useState(false);
+
+  const handleSignIn = async () => {
+    try {
+      await signInWithGoogle();
+      setIsOpen(false);
+    } catch (error: any) {
+      if (error.message?.includes("@ds.study.iitm.ac.in")) {
+        setShowRestriction(true);
+      }
+    }
+  };
 
   return (
     <nav className="border-b border-slate-200 bg-white">
@@ -57,7 +70,7 @@ export function Navbar() {
               </Button>
             </div>
           ) : (
-            <Button onClick={() => signInWithGoogle()}>Sign In</Button>
+            <Button onClick={handleSignIn}>Sign In</Button>
           )}
         </div>
 
@@ -129,13 +142,7 @@ export function Navbar() {
                   </Button>
                 </div>
               ) : (
-                <Button
-                  onClick={() => {
-                    signInWithGoogle();
-                    setIsOpen(false);
-                  }}
-                  className="w-full"
-                >
+                <Button onClick={handleSignIn} className="w-full">
                   Sign In
                 </Button>
               )}
@@ -143,6 +150,10 @@ export function Navbar() {
           </div>
         </div>
       )}
+      <OrgRestrictionModal
+        open={showRestriction}
+        onClose={() => setShowRestriction(false)}
+      />
     </nav>
   );
 }

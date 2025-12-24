@@ -13,10 +13,10 @@ export const signInWithGoogle = async () => {
     const result = await signInWithPopup(auth, googleProvider);
     const user = result.user;
 
-    // if (!user.email?.endsWith("@.com")) {
-    //   await firebaseSignOut(auth);
-    //   throw new Error("Access restricted to @organization.com emails only.");
-    // }
+    if (!user.email?.endsWith("@ds.study.iitm.ac.in")) {
+      await firebaseSignOut(auth);
+      throw new Error("Access restricted to @ds.study.iitm.ac.in emails only.");
+    }
 
     return user;
   } catch (error) {

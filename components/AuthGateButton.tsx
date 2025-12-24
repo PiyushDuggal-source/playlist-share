@@ -1,11 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/hooks/useAuth";
 import { signInWithGoogle } from "@/lib/firebase/auth";
-import { GraduationCap, Sparkles, Lock } from "lucide-react";
+import {
+  GraduationCap,
+  Sparkles,
+  Lock,
+  ShieldAlert,
+  ArrowLeft,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface AuthGateButtonProps {
@@ -62,6 +68,33 @@ export function AuthPromptModal({
   open: boolean;
   onClose: () => void;
 }) {
+  const [showRestriction, setShowRestriction] = useState(false);
+
+  useEffect(() => {
+    if (!open) setShowRestriction(false);
+  }, [open]);
+
+  const handleSignIn = async () => {
+    try {
+      await signInWithGoogle();
+      onClose();
+    } catch (error: any) {
+      if (error.message?.includes("@ds.study.iitm.ac.in")) {
+        setShowRestriction(true);
+      }
+    }
+  };
+
+  if (showRestriction) {
+    return (
+      <OrgRestrictionModal
+        open={true}
+        onClose={onClose}
+        onBack={() => setShowRestriction(false)}
+      />
+    );
+  }
+
   return (
     <AnimatePresence>
       {open && (
@@ -99,10 +132,7 @@ export function AuthPromptModal({
                 <Button
                   size="lg"
                   className="w-full gap-2 bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-900/20"
-                  onClick={async () => {
-                    await signInWithGoogle();
-                    onClose();
-                  }}
+                  onClick={handleSignIn}
                 >
                   <Lock className="h-4 w-4" />
                   Sign in with Google
@@ -115,6 +145,101 @@ export function AuthPromptModal({
                 >
                   Nah, just browsing
                 </Button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+export function OrgRestrictionModal({
+  open,
+  onClose,
+  onBack,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onBack?: () => void;
+}) {
+  return (
+    <AnimatePresence>
+      {open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl"
+          >
+            <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-br from-red-500 via-orange-500 to-amber-500" />
+
+            <div className="relative px-6 pt-12 pb-6">
+              <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-lg ring-4 ring-white/50">
+                <ShieldAlert className="h-10 w-10 text-red-600" />
+              </div>
+
+              <div className="text-center">
+                <h3 className="text-2xl font-bold text-slate-900">
+                  Access Restricted
+                </h3>
+                <p className="mt-3 text-slate-600 leading-relaxed">
+                  This app is exclusively for IITM BS Degree students. Please
+                  sign in with your{" "}
+                  <span className="font-semibold text-slate-900">
+                    @ds.study.iitm.ac.in
+                  </span>{" "}
+                  email address.
+                </p>
+              </div>
+
+              <div className="mt-8 space-y-3">
+                <Button
+                  size="lg"
+                  className="w-full gap-2 bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-900/20"
+                  onClick={async () => {
+                    try {
+                      await signInWithGoogle();
+                      onClose();
+                    } catch (error: any) {
+                      // If it fails again with same error, we just stay here
+                      if (!error.message?.includes("@ds.study.iitm.ac.in")) {
+                        console.error(error);
+                      }
+                    }
+                  }}
+                >
+                  <Lock className="h-4 w-4" />
+                  Try Another Account
+                </Button>
+                {onBack ? (
+                  <Button
+                    variant="ghost"
+                    size="lg"
+                    className="w-full text-slate-500 hover:text-slate-700 gap-2"
+                    onClick={onBack}
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                    Back
+                  </Button>
+                ) : (
+                  <Button
+                    variant="ghost"
+                    size="lg"
+                    className="w-full text-slate-500 hover:text-slate-700"
+                    onClick={onClose}
+                  >
+                    Close
+                  </Button>
+                )}
               </div>
             </div>
           </motion.div>
