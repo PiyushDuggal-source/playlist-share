@@ -1,4 +1,4 @@
-# Project Tasks: Academic Playlist Share Platform
+# Project Tasks: StudyStack Platform
 
 ## 1. Project Setup & Architecture
 - [x] 1.1. Define TypeScript interfaces for the data model (User, Subject, Playlist, PlaylistItem).

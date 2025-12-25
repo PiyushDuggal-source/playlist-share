@@ -27,8 +27,11 @@ export function Navbar() {
   return (
     <nav className="border-b border-slate-200 bg-white">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <Link href="/" className="text-xl font-bold text-slate-900">
-          PlaylistShare
+        <Link
+          href="/"
+          className="flex items-center gap-3 text-xl font-bold text-slate-900"
+        >
+          <img src="/studystack.png" alt="StudyStack Logo" className="h-14" />
         </Link>
 
         {/* Desktop Navigation */}
