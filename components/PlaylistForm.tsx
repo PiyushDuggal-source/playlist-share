@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { revalidatePlaylist } from "@/app/actions";
 import { Playlist, PlaylistItem, PlaylistItemType } from "@/types";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
@@ -12,6 +13,7 @@ import {
   getUserProfile,
 } from "@/lib/firebase/firestore";
 import { useAuth } from "@/hooks/useAuth";
+import MarkdownEditor from "@/components/MarkdownEditor";
 
 interface PlaylistFormProps {
   initialData?: Playlist;
@@ -76,6 +78,7 @@ export function PlaylistForm({ initialData }: PlaylistFormProps) {
 
       if (initialData) {
         await updatePlaylist(initialData.id, playlistData);
+        await revalidatePlaylist(initialData.id);
         router.push(`/playlist/${initialData.id}`);
       } else {
         const id = await createPlaylist(playlistData);
@@ -193,16 +196,10 @@ export function PlaylistForm({ initialData }: PlaylistFormProps) {
                       />
                     </div>
 
-                    <div className="space-y-2">
-                      <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
-                        Notes (Optional)
-                      </label>
-                      <textarea
-                        className="flex min-h-[80px] w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                        value={item.notes}
-                        onChange={(e) =>
-                          updateItem(index, "notes", e.target.value)
-                        }
+                    <div>
+                      <MarkdownEditor
+                        value={item.notes || ""}
+                        onChange={(v) => updateItem(index, "notes", v)}
                         placeholder="Add context: 'Watch from 10:00' or 'Read pages 5-10'"
                       />
                     </div>

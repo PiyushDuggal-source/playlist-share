@@ -76,6 +76,21 @@ export const getPlaylist = async (id: string): Promise<Playlist | null> => {
   return null;
 };
 
+export const updateAuthorDetailsOnPlaylists = async (
+  authorId: string,
+  data: { authorName?: string; authorLevel?: number }
+) => {
+  const q = query(playlistsCollection, where("authorId", "==", authorId));
+  const snapshot = await getDocs(q);
+  const updates = snapshot.docs.map((playlistDoc) =>
+    updateDoc(doc(db, "playlists", playlistDoc.id), {
+      ...data,
+      updatedAt: Date.now(),
+    })
+  );
+  await Promise.all(updates);
+};
+
 export const createPlaylist = async (
   playlist: Omit<Playlist, "id" | "createdAt" | "updatedAt">
 ) => {

@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { likePlaylist, unlikePlaylist } from "@/lib/firebase/firestore";
 import { AuthPromptModal } from "@/components/AuthGateButton";
 import { Button } from "@/components/ui/Button";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface LikeButtonProps {
   playlistId: string;
@@ -19,6 +20,7 @@ export function LikeButton({
   initialLikedBy = [],
 }: LikeButtonProps) {
   const { user, loading } = useAuth();
+  const queryClient = useQueryClient();
   const [openModal, setOpenModal] = useState(false);
   const [likes, setLikes] = useState(initialLikes);
   const [likedBy, setLikedBy] = useState<string[]>(initialLikedBy);
@@ -43,6 +45,8 @@ export function LikeButton({
         setLikedBy((arr) => [...arr, user.uid]);
         await likePlaylist(playlistId, user.uid);
       }
+      queryClient.invalidateQueries({ queryKey: ["playlist", playlistId] });
+      queryClient.invalidateQueries({ queryKey: ["playlists"] });
     } catch (error) {
       console.error("Error updating like", error);
       // revert optimistic change

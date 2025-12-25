@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { getAllPlaylists } from "@/lib/firebase/firestore";
 import { Playlist } from "@/types";
 import {
@@ -13,27 +14,16 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { AuthGateButton } from "@/components/AuthGateButton";
 import { ShareButton } from "@/components/ShareButton";
+import { LevelBadge } from "@/components/LevelBadge";
 import Link from "next/link";
 import { Heart } from "lucide-react";
 
 export default function PlaylistsPage() {
-  const [playlists, setPlaylists] = useState<Playlist[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: playlists = [], isLoading: loading } = useQuery({
+    queryKey: ["playlists"],
+    queryFn: getAllPlaylists,
+  });
   const [query, setQuery] = useState("");
-
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const data = await getAllPlaylists();
-        setPlaylists(data);
-      } catch (error) {
-        console.error("Error loading playlists", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, []);
 
   const filtered = useMemo(() => {
     if (!query) return playlists;
@@ -104,9 +94,7 @@ export default function PlaylistsPage() {
                       >
                         By {playlist.authorName}
                         {playlist.authorLevel && (
-                          <span className="ml-1.5 inline-flex items-center justify-center bg-slate-100 text-slate-600 rounded-full h-4 w-4 text-[10px] -mr-1">
-                            {playlist.authorLevel}
-                          </span>
+                          <LevelBadge level={playlist.authorLevel} compact />
                         )}
                       </Badge>
                     </Link>

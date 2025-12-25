@@ -3,21 +3,41 @@
 import { useState, useEffect } from "react";
 import { User } from "firebase/auth";
 import { UserProfile } from "@/types";
-import { getUserProfile, updateUserProfile } from "@/lib/firebase/firestore";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  getUserProfile,
+  updateUserProfile,
+  updateAuthorDetailsOnPlaylists,
+} from "@/lib/firebase/firestore";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Pencil, Save, X, Plus, Trash } from "lucide-react";
+import { LevelBadge } from "@/components/LevelBadge";
 
 interface ProfileEditorProps {
   user: User;
 }
 
 export function ProfileEditor({ user }: ProfileEditorProps) {
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+
+  // Fetch profile
+  const { data: profile, isLoading: loading } = useQuery({
+    queryKey: ["userProfile", user.uid],
+    queryFn: async () => {
+      const data = await getUserProfile(user.uid);
+      if (data) return data;
+      // Return default if no profile exists
+      return {
+        uid: user.uid,
+        email: user.email || "",
+        displayName: user.displayName || "",
+        photoURL: user.photoURL || undefined,
+      } as UserProfile;
+    },
+  });
 
   // Form state
   const [level, setLevel] = useState<number>(1);
@@ -29,55 +49,53 @@ export function ProfileEditor({ user }: ProfileEditorProps) {
   const [newSubject, setNewSubject] = useState("");
   const [newProject, setNewProject] = useState("");
 
+  // Sync form state with profile when loaded or changed
   useEffect(() => {
-    const loadProfile = async () => {
-      try {
-        const data = await getUserProfile(user.uid);
-        if (data) {
-          setProfile(data);
-          setLevel(data.level || 1);
-          setBio(data.bio || "");
-          setSubjects(data.subjects || []);
-          setProjects(data.projects || []);
-        } else {
-          // Initialize with basic auth data if no profile exists
-          setProfile({
-            uid: user.uid,
-            email: user.email || "",
-            displayName: user.displayName || "",
-            photoURL: user.photoURL || undefined,
-          });
-        }
-      } catch (error) {
-        console.error("Error loading profile", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadProfile();
-  }, [user]);
-
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      const updatedData: Partial<UserProfile> = {
-        level,
-        bio,
-        subjects,
-        projects,
-        email: user.email || "",
-        displayName: user.displayName || "",
-        photoURL: user.photoURL || undefined,
-      };
-
-      await updateUserProfile(user.uid, updatedData);
-      setProfile({ ...profile!, ...updatedData });
-      setIsEditing(false);
-    } catch (error) {
-      console.error("Error saving profile", error);
-    } finally {
-      setSaving(false);
+    if (profile) {
+      setLevel(profile.level || 1);
+      setBio(profile.bio || "");
+      setSubjects(profile.subjects || []);
+      setProjects(profile.projects || []);
     }
+  }, [profile]);
+
+  // Mutation for updating profile
+  const { mutate: saveProfile, isPending: saving } = useMutation({
+    mutationFn: async (updatedData: Partial<UserProfile>) => {
+      await updateUserProfile(user.uid, updatedData);
+      await updateAuthorDetailsOnPlaylists(user.uid, {
+        authorName: updatedData.displayName || undefined,
+        authorLevel: updatedData.level,
+      });
+      return updatedData;
+    },
+    onSuccess: (updatedData) => {
+      queryClient.setQueryData(
+        ["userProfile", user.uid],
+        (old: UserProfile) => ({
+          ...old,
+          ...updatedData,
+        })
+      );
+      queryClient.invalidateQueries({ queryKey: ["playlists"] });
+      setIsEditing(false);
+    },
+    onError: (error) => {
+      console.error("Error saving profile", error);
+    },
+  });
+
+  const handleSave = () => {
+    const updatedData: Partial<UserProfile> = {
+      level,
+      bio,
+      subjects,
+      projects,
+      email: user.email || "",
+      displayName: user.displayName || "",
+      photoURL: user.photoURL || undefined,
+    };
+    saveProfile(updatedData);
   };
 
   const addSubject = () => {
@@ -138,18 +156,23 @@ export function ProfileEditor({ user }: ProfileEditorProps) {
             <label className="text-sm font-medium text-slate-700">
               Degree Level
             </label>
-            <div className="flex gap-2">
-              {[1, 2, 3, 4].map((l) => (
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { level: 1, name: "Foundational" },
+                { level: 2, name: "Diploma" },
+                { level: 3, name: "BSc Degree" },
+                { level: 4, name: "BS Degree" },
+              ].map(({ level: l, name }) => (
                 <button
                   key={l}
                   onClick={() => setLevel(l)}
-                  className={`h-10 w-10 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
+                  className={`p-3 rounded-lg border-2 text-sm font-medium transition-colors ${
                     level === l
-                      ? "bg-indigo-600 text-white"
-                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                      ? "bg-indigo-600 text-white border-indigo-600"
+                      : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
                   }`}
                 >
-                  {l}
+                  {name}
                 </button>
               ))}
             </div>
@@ -289,9 +312,7 @@ export function ProfileEditor({ user }: ProfileEditorProps) {
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium text-slate-500">Level</span>
-              <Badge className="bg-indigo-600 hover:bg-indigo-700">
-                {profile?.level || 1}
-              </Badge>
+              <LevelBadge level={profile?.level || 1} />
             </div>
           </div>
 

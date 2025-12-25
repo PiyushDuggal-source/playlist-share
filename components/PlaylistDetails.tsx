@@ -1,6 +1,8 @@
 "use client";
 
 import { Playlist } from "@/types";
+import { useQuery } from "@tanstack/react-query";
+import { getPlaylist } from "@/lib/firebase/firestore";
 import { Card, CardContent } from "@/components/ui/Card";
 import {
   ExternalLink,
@@ -12,11 +14,31 @@ import {
 import { EditPlaylistButton } from "@/components/EditPlaylistButton";
 import { LikeButton } from "@/components/LikeButton";
 import { ShareButton } from "@/components/ShareButton";
+import { LevelBadge } from "@/components/LevelBadge";
 import { motion } from "framer-motion";
-import { Badge } from "@/components/ui/Badge";
 import Link from "next/link";
+import { Badge } from "@/components/ui/Badge";
+import dynamic from "next/dynamic";
 
-export function PlaylistDetails({ playlist }: { playlist: Playlist }) {
+const MarkdownPreview = dynamic(
+  () => import("@uiw/react-md-editor").then((mod) => mod.default.Markdown),
+  { ssr: false }
+);
+
+export function PlaylistDetails({
+  playlist: initialPlaylist,
+}: {
+  playlist: Playlist;
+}) {
+  const { data: playlist } = useQuery({
+    queryKey: ["playlist", initialPlaylist.id],
+    queryFn: async () => {
+      const data = await getPlaylist(initialPlaylist.id);
+      if (!data) throw new Error("Playlist not found");
+      return data;
+    },
+    initialData: initialPlaylist,
+  });
   return (
     <div className="space-y-8 max-w-4xl mx-auto py-8 px-4">
       <motion.div
@@ -51,9 +73,7 @@ export function PlaylistDetails({ playlist }: { playlist: Playlist }) {
               >
                 By {playlist.authorName}
                 {playlist.authorLevel && (
-                  <span className="inline-flex items-center justify-center bg-slate-100 text-slate-600 rounded-full h-4 w-4 text-[10px]">
-                    {playlist.authorLevel}
-                  </span>
+                  <LevelBadge level={playlist.authorLevel} compact />
                 )}
               </Link>
               <span>•</span>
@@ -127,11 +147,19 @@ export function PlaylistDetails({ playlist }: { playlist: Playlist }) {
                     </div>
 
                     {item.notes && (
-                      <div className="text-sm text-slate-600 bg-slate-50 p-3 rounded-lg mt-2 border border-slate-100">
+                      <div
+                        className="text-sm text-slate-600 bg-slate-50 p-3 rounded-lg mt-2 border border-slate-100"
+                        data-color-mode="light"
+                      >
                         <span className="font-semibold text-slate-500 text-xs uppercase tracking-wider block mb-1">
                           Notes
                         </span>
-                        {item.notes}
+                        <MarkdownPreview
+                          source={item.notes}
+                          style={{
+                            backgroundColor: "transparent",
+                          }}
+                        />
                       </div>
                     )}
 

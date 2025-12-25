@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 import { User as UserIcon } from "lucide-react";
+import { LevelBadge } from "@/components/LevelBadge";
 
 export default function UsersPage() {
   const [users, setUsers] = useState<UserProfile[]>([]);
@@ -71,9 +72,7 @@ export default function UsersPage() {
                     <CardTitle className="text-lg">
                       {user.displayName}
                     </CardTitle>
-                    <Badge variant="secondary" className="mt-1">
-                      Level {user.level || 1}
-                    </Badge>
+                    <LevelBadge level={user.level || 1} />
                   </div>
                 </CardHeader>
                 <CardDescription className="px-6 pb-6 flex-1">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { getAllPlaylists } from "@/lib/firebase/firestore";
 import { Playlist } from "@/types";
 import {
@@ -15,6 +15,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Badge } from "@/components/ui/Badge";
 import { motion } from "framer-motion";
 import { AuthGateButton } from "@/components/AuthGateButton";
+import { LevelBadge } from "@/components/LevelBadge";
 import {
   PlayCircle,
   FileText,
@@ -26,25 +27,15 @@ import {
   Share2,
   Heart,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const { user } = useAuth();
-  const [playlists, setPlaylists] = useState<Playlist[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchPlaylists = async () => {
-      try {
-        const data = await getAllPlaylists();
-        setPlaylists(data);
-      } catch (error) {
-        console.error("Error fetching playlists:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchPlaylists();
-  }, []);
+  const { data: playlists = [], isLoading: loading } = useQuery({
+    queryKey: ["playlists"],
+    queryFn: getAllPlaylists,
+  });
 
   return (
     <div className="relative overflow-hidden bg-slate-50">
@@ -84,7 +75,7 @@ function Hero({ userLoggedIn }: { userLoggedIn: boolean }) {
             className="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700 border border-indigo-100"
           >
             <Zap className="h-3 w-3" />
-            Login with your .edu to start building
+            Login with your .ds.study.iitm.ac.in to start building
           </motion.div>
         </div>
 
@@ -245,6 +236,7 @@ function FeaturedPlaylists({
 }) {
   const skeletons = Array.from({ length: 6 });
   const list = playlists.slice(0, 9);
+  const navigate = useRouter();
 
   return (
     <section id="featured" className="space-y-6">
@@ -291,18 +283,17 @@ function FeaturedPlaylists({
                       {playlist.items?.length || 0} items
                     </Badge>
                     <span className="text-xs text-slate-400">•</span>
-                    <Link
-                      href={`/users/${playlist.authorId}`}
+                    <span
                       className="text-xs font-medium text-slate-500 hover:text-indigo-600 hover:underline flex items-center gap-1"
-                      onClick={(e) => e.stopPropagation()}
+                      onClick={() =>
+                        navigate.push(`/users/${playlist.authorId}`)
+                      }
                     >
                       By {playlist.authorName}
                       {playlist.authorLevel && (
-                        <span className="inline-flex items-center justify-center bg-slate-100 text-slate-600 rounded-full h-4 w-4 text-[10px]">
-                          {playlist.authorLevel}
-                        </span>
+                        <LevelBadge level={playlist.authorLevel} compact />
                       )}
-                    </Link>
+                    </span>
                     {playlist.likes !== undefined && (
                       <div className="flex items-center gap-1 ml-auto text-slate-500">
                         <Heart className="h-3 w-3 fill-slate-300 text-slate-400" />
