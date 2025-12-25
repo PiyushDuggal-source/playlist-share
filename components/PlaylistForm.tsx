@@ -53,17 +53,32 @@ export function PlaylistForm({ initialData }: PlaylistFormProps) {
   );
 
   const addItem = () => {
-    window.scrollTo(0, document.body.scrollHeight + 100);
-    setItems([
-      ...items,
+    // create id first so we can scroll to the new element after render
+    const id = crypto.randomUUID();
+    setItems((prev) => [
+      ...prev,
       {
-        id: crypto.randomUUID(),
+        id,
         title: "",
         type: "video",
         url: "",
         notes: "",
       },
     ]);
+
+    // wait a tick for the DOM to update, then smooth-scroll the new item into view
+    setTimeout(() => {
+      const el = document.getElementById(`item-${id}`);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+      } else {
+        // fallback to scrolling to bottom
+        window.scrollTo({
+          top: document.documentElement.scrollHeight,
+          behavior: "smooth",
+        });
+      }
+    }, 80);
   };
 
   const updateItem = (id: string, field: keyof PlaylistItem, value: string) => {

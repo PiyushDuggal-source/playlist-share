@@ -34,7 +34,12 @@ export function SortablePlaylistItem({
   };
 
   return (
-    <div ref={setNodeRef} style={style} className="relative">
+    <div
+      id={`item-${item.id}`}
+      ref={setNodeRef}
+      style={style}
+      className="relative"
+    >
       <Card className="border-slate-200 shadow-sm">
         <CardContent className="p-4 space-y-4">
           <div className="flex items-start gap-4">
