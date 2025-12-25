@@ -5,8 +5,23 @@ import { useRouter } from "next/navigation";
 import { revalidatePlaylist } from "@/app/actions";
 import { Playlist, PlaylistItem, PlaylistItemType } from "@/types";
 import { Button } from "@/components/ui/Button";
-import { Card, CardContent } from "@/components/ui/Card";
-import { Trash2, GripVertical, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { SortablePlaylistItem } from "./SortablePlaylistItem";
 import {
   createPlaylist,
   updatePlaylist,
@@ -30,7 +45,15 @@ export function PlaylistForm({ initialData }: PlaylistFormProps) {
   );
   const [items, setItems] = useState<PlaylistItem[]>(initialData?.items || []);
 
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
   const addItem = () => {
+    window.scrollTo(0, document.body.scrollHeight + 100);
     setItems([
       ...items,
       {
@@ -43,18 +66,29 @@ export function PlaylistForm({ initialData }: PlaylistFormProps) {
     ]);
   };
 
-  const updateItem = (
-    index: number,
-    field: keyof PlaylistItem,
-    value: string
-  ) => {
-    const newItems = [...items];
-    newItems[index] = { ...newItems[index], [field]: value };
-    setItems(newItems);
+  const updateItem = (id: string, field: keyof PlaylistItem, value: string) => {
+    setItems(
+      items.map((item) => (item.id === id ? { ...item, [field]: value } : item))
+    );
   };
 
-  const removeItem = (index: number) => {
-    setItems(items.filter((_, i) => i !== index));
+  const removeItem = (id: string) => {
+    if (confirm("Are you sure you want to remove this item?")) {
+      setItems(items.filter((item) => item.id !== id));
+    }
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      setItems((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over.id);
+
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -136,87 +170,25 @@ export function PlaylistForm({ initialData }: PlaylistFormProps) {
         </div>
 
         <div className="space-y-4">
-          {items.map((item, index) => (
-            <Card key={item.id} className="border-slate-200 shadow-sm">
-              <CardContent className="p-4 space-y-4">
-                <div className="flex items-start gap-4">
-                  <div className="mt-3 text-slate-300 cursor-move">
-                    <GripVertical className="h-5 w-5" />
-                  </div>
-                  <div className="flex-grow space-y-4">
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <div className="space-y-2">
-                        <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
-                          Title
-                        </label>
-                        <input
-                          required
-                          className="flex h-10 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                          value={item.title}
-                          onChange={(e) =>
-                            updateItem(index, "title", e.target.value)
-                          }
-                          placeholder="e.g. Lecture 1: Intro"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
-                          Type
-                        </label>
-                        <select
-                          className="flex h-10 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                          value={item.type}
-                          onChange={(e) =>
-                            updateItem(
-                              index,
-                              "type",
-                              e.target.value as PlaylistItemType
-                            )
-                          }
-                        >
-                          <option value="video">Video</option>
-                          <option value="document">Document</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
-                        URL
-                      </label>
-                      <input
-                        required
-                        type="url"
-                        className="flex h-10 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                        value={item.url}
-                        onChange={(e) =>
-                          updateItem(index, "url", e.target.value)
-                        }
-                        placeholder="https://youtube.com/..."
-                      />
-                    </div>
-
-                    <div>
-                      <MarkdownEditor
-                        value={item.notes || ""}
-                        onChange={(v) => updateItem(index, "notes", v)}
-                        placeholder="Add context: 'Watch from 10:00' or 'Read pages 5-10'"
-                      />
-                    </div>
-                  </div>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="text-slate-400 hover:text-red-500 hover:bg-red-50"
-                    onClick={() => removeItem(index)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={items.map((item) => item.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              {items.map((item) => (
+                <SortablePlaylistItem
+                  key={item.id}
+                  item={item}
+                  onUpdate={updateItem}
+                  onRemove={removeItem}
+                />
+              ))}
+            </SortableContext>
+          </DndContext>
           {items.length === 0 && (
             <div className="text-center py-12 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50">
               <p className="text-slate-500">
