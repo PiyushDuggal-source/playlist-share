@@ -25,6 +25,11 @@ export const metadata: Metadata = {
   authors: [{ name: "Piyush Duggal" }],
   creator: "StudyStack",
   publisher: "StudyStack",
+  icons: {
+    icon: "/favicon.png",
+    shortcut: "/favicon.png",
+    apple: "/favicon.png",
+  },
   openGraph: {
     title: "StudyStack - Organize Your Coursework",
     description:
@@ -78,7 +83,7 @@ export default function RootLayout({
         <Providers>
           <div className="min-h-screen bg-slate-50">
             <Navbar />
-            <main className="mx-auto sm:px-4 py-8">{children}</main>
+            <main className="py-8 mx-auto sm:px-4">{children}</main>
           </div>
         </Providers>
       </body>
