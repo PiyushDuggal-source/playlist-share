@@ -17,6 +17,7 @@ export interface Playlist {
   authorName: string;
   authorLevel?: number;
   items: PlaylistItem[];
+  isPublic: boolean; // controls visibility outside author profile
   likes?: number;
   likedBy?: string[];
   createdAt: number; // Timestamp

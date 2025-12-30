@@ -41,7 +41,7 @@ export default function Home() {
     <div className="relative overflow-hidden bg-slate-50">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.12),_transparent_45%),_radial-gradient(circle_at_20%_20%,_rgba(99,102,241,0.12),_transparent_35%)]" />
 
-      <main className="relative container mx-auto px-4 py-12 space-y-24">
+      <main className="container relative px-4 py-6 sm:py-12 mx-auto space-y-24">
         <Hero userLoggedIn={!!user} />
         <Stats playlists={playlists} loading={loading} />
         <FeaturedPlaylists playlists={playlists} loading={loading} />
@@ -55,16 +55,16 @@ export default function Home() {
 // Hero Section
 function Hero({ userLoggedIn }: { userLoggedIn: boolean }) {
   return (
-    <div className="grid gap-12 lg:grid-cols-[1.1fr_0.9fr] items-center pt-8">
+    <div className="grid gap-12 lg:grid-cols-[1.1fr_0.9fr] items-center pt-4 sm:pt-8">
       <div className="space-y-8">
         <div className="flex flex-wrap gap-3">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 shadow-sm"
+            className="inline-flex items-center gap-2 px-3 py-1 text-xs font-semibold bg-white border rounded-full shadow-sm border-slate-200 text-slate-700"
           >
-            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             Made by students who actually study
           </motion.div>
 
@@ -72,9 +72,9 @@ function Hero({ userLoggedIn }: { userLoggedIn: boolean }) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.05, duration: 0.6 }}
-            className="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700 border border-indigo-100"
+            className="inline-flex items-center gap-2 px-3 py-1 text-xs font-semibold text-indigo-700 border border-indigo-100 rounded-full bg-indigo-50"
           >
-            <Zap className="h-3 w-3" />
+            <Zap className="w-3 h-3" />
             Login with your .ds.study.iitm.ac.in to start building
           </motion.div>
         </div>
@@ -96,7 +96,7 @@ function Hero({ userLoggedIn }: { userLoggedIn: boolean }) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.6 }}
-          className="text-xl text-slate-600 max-w-2xl leading-relaxed"
+          className="max-w-2xl text-xl leading-relaxed text-slate-600"
         >
           Organize every lecture, PDF, and random YouTube tutorial into a
           single, binge-worthy stream. Your GPA will thank you.
@@ -134,13 +134,13 @@ function Hero({ userLoggedIn }: { userLoggedIn: boolean }) {
         className="relative"
       >
         <div className="absolute -inset-10 bg-gradient-to-tr from-indigo-200 via-purple-100 to-emerald-100 blur-3xl opacity-60" />
-        <div className="relative rounded-2xl border border-slate-200 bg-white/90 shadow-2xl backdrop-blur-xl p-6 ring-1 ring-slate-900/5">
-          <div className="flex items-center justify-between mb-6 border-b border-slate-100 pb-4">
+        <div className="relative p-6 border shadow-2xl rounded-2xl border-slate-200 bg-white/90 backdrop-blur-xl ring-1 ring-slate-900/5">
+          <div className="flex items-center justify-between pb-4 mb-6 border-b border-slate-100">
             <div>
-              <p className="text-xs font-bold text-indigo-600 uppercase tracking-wider">
+              <p className="text-xs font-bold tracking-wider text-indigo-600 uppercase">
                 Course Playlist
               </p>
-              <p className="text-xl font-bold text-slate-900 mt-1">
+              <p className="mt-1 text-xl font-bold text-slate-900">
                 CS 101: Deep Learning Survival Guide
               </p>
             </div>
@@ -160,7 +160,7 @@ function Hero({ userLoggedIn }: { userLoggedIn: boolean }) {
                 initial={{ opacity: 0, x: 10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.3 + idx * 0.1, duration: 0.4 }}
-                className="group flex items-center justify-between rounded-xl border border-slate-100 bg-white px-4 py-3 hover:border-indigo-200 hover:shadow-sm transition-all"
+                className="flex items-center justify-between px-4 py-3 transition-all bg-white border group rounded-xl border-slate-100 hover:border-indigo-200 hover:shadow-sm"
               >
                 <div className="flex items-center gap-3 text-sm font-medium text-slate-700">
                   <span className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 text-[10px] font-bold text-slate-500 group-hover:bg-indigo-100 group-hover:text-indigo-600 transition-colors">
@@ -169,9 +169,9 @@ function Hero({ userLoggedIn }: { userLoggedIn: boolean }) {
                   {item.title}
                 </div>
                 {item.type === "video" ? (
-                  <PlayCircle className="h-4 w-4 text-slate-400 group-hover:text-indigo-500" />
+                  <PlayCircle className="w-4 h-4 text-slate-400 group-hover:text-indigo-500" />
                 ) : (
-                  <FileText className="h-4 w-4 text-slate-400 group-hover:text-emerald-500" />
+                  <FileText className="w-4 h-4 text-slate-400 group-hover:text-emerald-500" />
                 )}
               </motion.div>
             ))}
@@ -209,10 +209,10 @@ function Stats({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: loading ? 0.6 : 1, y: 0 }}
           transition={{ delay: 0.05 * idx, duration: 0.4 }}
-          className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow"
+          className="flex items-center gap-4 p-6 transition-shadow bg-white border shadow-sm rounded-2xl border-slate-200 hover:shadow-md"
         >
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-50 text-indigo-600">
-            <stat.icon className="h-6 w-6" />
+          <div className="flex items-center justify-center w-12 h-12 text-indigo-600 rounded-full bg-indigo-50">
+            <stat.icon className="w-6 h-6" />
           </div>
           <div>
             <p className="text-sm font-medium text-slate-500">{stat.label}</p>
@@ -245,7 +245,7 @@ function FeaturedPlaylists({
           <h2 className="text-3xl font-bold text-slate-900">
             Trending Courses
           </h2>
-          <p className="text-slate-600 mt-1">
+          <p className="mt-1 text-slate-600">
             See what everyone else is using to pass.
           </p>
         </div>
@@ -263,28 +263,28 @@ function FeaturedPlaylists({
             transition={{ delay: 0.05 * idx, duration: 0.4 }}
           >
             {loading ? (
-              <div className="h-40 rounded-xl border border-slate-200 bg-slate-100 animate-pulse" />
+              <div className="h-40 border rounded-xl border-slate-200 bg-slate-100 animate-pulse" />
             ) : (
               <Link href={`/playlist/${playlist.id}`}>
-                <Card className="h-full hover:-translate-y-1 hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col border-slate-200/60 bg-white/50 backdrop-blur-sm">
+                <Card className="flex flex-col h-full transition-all duration-300 cursor-pointer hover:-translate-y-1 hover:shadow-xl border-slate-200/60 bg-white/50 backdrop-blur-sm">
                   <CardHeader>
-                    <CardTitle className="line-clamp-1 text-lg">
+                    <CardTitle className="text-lg line-clamp-1">
                       {playlist.name}
                     </CardTitle>
                     <CardDescription className="line-clamp-2">
                       {playlist.description}
                     </CardDescription>
                   </CardHeader>
-                  <CardDescription className="px-6 pb-6 text-sm text-slate-600 flex flex-wrap gap-2 items-center mt-auto">
+                  <CardDescription className="flex flex-wrap items-center gap-2 px-6 pb-6 mt-auto text-sm text-slate-600">
                     <Badge
                       variant="secondary"
-                      className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100"
+                      className="text-indigo-700 bg-indigo-50 hover:bg-indigo-100"
                     >
                       {playlist.items?.length || 0} items
                     </Badge>
                     <span className="text-xs text-slate-400">•</span>
                     <span
-                      className="text-xs font-medium text-slate-500 hover:text-indigo-600 hover:underline flex items-center gap-1"
+                      className="flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-indigo-600 hover:underline"
                       onClick={() =>
                         navigate.push(`/users/${playlist.authorId}`)
                       }
@@ -296,7 +296,7 @@ function FeaturedPlaylists({
                     </span>
                     {playlist.likes !== undefined && (
                       <div className="flex items-center gap-1 ml-auto text-slate-500">
-                        <Heart className="h-3 w-3 fill-slate-300 text-slate-400" />
+                        <Heart className="w-3 h-3 fill-slate-300 text-slate-400" />
                         <span className="text-xs font-medium">
                           {playlist.likes}
                         </span>
@@ -311,14 +311,14 @@ function FeaturedPlaylists({
       </div>
 
       {!loading && playlists.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-16 bg-white rounded-2xl border border-dashed border-slate-300 text-center">
-          <div className="h-16 w-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
-            <BookOpen className="h-8 w-8 text-slate-400" />
+        <div className="flex flex-col items-center justify-center py-16 text-center bg-white border border-dashed rounded-2xl border-slate-300">
+          <div className="flex items-center justify-center w-16 h-16 mb-4 rounded-full bg-slate-50">
+            <BookOpen className="w-8 h-8 text-slate-400" />
           </div>
           <h3 className="text-lg font-semibold text-slate-900">
             It's quiet... too quiet.
           </h3>
-          <p className="text-slate-500 max-w-sm mt-2">
+          <p className="max-w-sm mt-2 text-slate-500">
             No one has shared a course yet. Be the legend who starts the first
             one.
           </p>
@@ -356,7 +356,7 @@ function HowItWorks() {
         <p className="text-lg text-slate-600">
           Three simple steps to turn a messy syllabus into a followable journey.
         </p>
-        <div className="space-y-4 mt-8">
+        <div className="mt-8 space-y-4">
           {steps.map((step, idx) => (
             <motion.div
               key={step.title}
@@ -364,14 +364,14 @@ function HowItWorks() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.05 * idx, duration: 0.4 }}
-              className="flex gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:border-indigo-200 transition-colors"
+              className="flex gap-4 p-5 transition-colors bg-white border shadow-sm rounded-2xl border-slate-200 hover:border-indigo-200"
             >
-              <div className="h-10 w-10 shrink-0 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-lg">
+              <div className="flex items-center justify-center w-10 h-10 text-lg font-bold text-indigo-600 rounded-full shrink-0 bg-indigo-50">
                 {idx + 1}
               </div>
               <div>
-                <p className="font-bold text-slate-900 text-lg">{step.title}</p>
-                <p className="text-slate-600 mt-1 leading-relaxed">
+                <p className="text-lg font-bold text-slate-900">{step.title}</p>
+                <p className="mt-1 leading-relaxed text-slate-600">
                   {step.copy}
                 </p>
               </div>
@@ -385,23 +385,23 @@ function HowItWorks() {
         whileInView={{ opacity: 1, scale: 1 }}
         viewport={{ once: true }}
         transition={{ duration: 0.5 }}
-        className="rounded-3xl border border-slate-200 bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-600 text-white shadow-2xl p-8 relative overflow-hidden"
+        className="relative p-8 overflow-hidden text-white border shadow-2xl rounded-3xl border-slate-200 bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-600"
       >
-        <div className="absolute top-0 right-0 -mt-10 -mr-10 h-40 w-40 rounded-full bg-white/10 blur-3xl" />
-        <div className="absolute bottom-0 left-0 -mb-10 -ml-10 h-40 w-40 rounded-full bg-emerald-400/20 blur-3xl" />
+        <div className="absolute top-0 right-0 w-40 h-40 -mt-10 -mr-10 rounded-full bg-white/10 blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-40 h-40 -mb-10 -ml-10 rounded-full bg-emerald-400/20 blur-3xl" />
 
-        <p className="text-sm font-bold uppercase tracking-widest text-indigo-200">
+        <p className="text-sm font-bold tracking-widest text-indigo-200 uppercase">
           Why this works
         </p>
         <h3 className="mt-4 text-3xl font-bold">
           Stay organized, stay generous.
         </h3>
-        <p className="mt-4 text-indigo-100 text-lg leading-relaxed">
+        <p className="mt-4 text-lg leading-relaxed text-indigo-100">
           Your playlist is the course map. Keep it updated, add context, and
           your classmates will thank you. Less searching, more learning.
         </p>
-        <div className="mt-8 flex items-center gap-2 text-sm font-medium text-indigo-200">
-          <Share2 className="h-4 w-4" />
+        <div className="flex items-center gap-2 mt-8 text-sm font-medium text-indigo-200">
+          <Share2 className="w-4 h-4" />
           <span>Shareable with one click</span>
         </div>
       </motion.div>
@@ -411,22 +411,22 @@ function HowItWorks() {
 
 function CTA({ userLoggedIn }: { userLoggedIn: boolean }) {
   return (
-    <section className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl">
+    <section className="relative overflow-hidden bg-white border shadow-xl rounded-3xl border-slate-200">
       <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 via-white to-emerald-50 opacity-80" />
       <div className="relative flex flex-col gap-8 px-8 py-12 md:flex-row md:items-center md:justify-between">
         <div className="max-w-xl">
-          <p className="text-sm font-bold text-indigo-600 uppercase tracking-wider">
+          <p className="text-sm font-bold tracking-wider text-indigo-600 uppercase">
             Ready to share?
           </p>
-          <h3 className="text-3xl font-bold text-slate-900 mt-2">
+          <h3 className="mt-2 text-3xl font-bold text-slate-900">
             Publish your next course playlist today.
           </h3>
-          <p className="text-lg text-slate-600 mt-3">
+          <p className="mt-3 text-lg text-slate-600">
             No uploads—just links, notes, and a clean flow your peers can
             follow. Be the reason someone passes this semester.
           </p>
         </div>
-        <div className="flex flex-col sm:flex-row gap-4 shrink-0">
+        <div className="flex flex-col gap-4 sm:flex-row shrink-0">
           <AuthGateButton
             href="/playlist/create"
             size="lg"

@@ -14,6 +14,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
 import dynamic from "next/dynamic";
 import { getYouTubeEmbedUrl } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
 
 const MarkdownPreview = dynamic(
   () => import("@uiw/react-md-editor").then((mod) => mod.default.Markdown),
@@ -34,8 +35,40 @@ export function PlaylistDetails({
     },
     initialData: initialPlaylist,
   });
+  const { user, loading: authLoading } = useAuth();
+  const isPublic = playlist.isPublic !== false;
+  const isOwner = user?.uid === playlist.authorId;
+  const canView = isPublic || isOwner;
+
+  if (!isPublic && authLoading) {
+    return (
+      <div className="flex items-center justify-center h-[50vh] text-slate-400">
+        Checking access...
+      </div>
+    );
+  }
+
+  if (!canView) {
+    return (
+      <div className="max-w-xl px-4 py-24 mx-auto space-y-4 text-center">
+        <h1 className="text-2xl font-semibold text-slate-900">
+          This playlist is private.
+        </h1>
+        <p className="text-slate-600">
+          The author hasn&apos;t shared this course yet. Ask them to make it
+          public or explore other playlists.
+        </p>
+        <Link
+          href="/playlists"
+          className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium transition-colors border rounded-lg text-slate-700 border-slate-300 hover:bg-slate-100"
+        >
+          Browse public playlists
+        </Link>
+      </div>
+    );
+  }
   return (
-    <div className="max-w-4xl px-4 py-8 mx-auto space-y-8">
+    <div className="max-w-4xl px-4 py-4 sm:py-8 mx-auto space-y-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -51,6 +84,16 @@ export function PlaylistDetails({
               >
                 Course Playlist
               </Badge>
+              <Badge
+                variant="outline"
+                className={
+                  isPublic
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                    : "border-amber-200 bg-amber-50 text-amber-700"
+                }
+              >
+                {isPublic ? "Public" : "Private"}
+              </Badge>
               <span className="text-sm text-slate-500">
                 Updated {new Date().toLocaleDateString()}
               </span>
@@ -64,7 +107,7 @@ export function PlaylistDetails({
               </div>
               <Link
                 href={`/users/${playlist.authorId}`}
-                className="flex items-center gap-1 font-medium hover:text-indigo-600 hover:underline"
+                className="flex items-center gap-1 text-xs sm:text-sm underline font-medium hover:text-indigo-600 hover:underline"
               >
                 By {playlist.authorName}
                 {playlist.authorLevel && (
@@ -72,16 +115,18 @@ export function PlaylistDetails({
                 )}
               </Link>
               <span>•</span>
-              <span>{playlist.items?.length || 0} items</span>
+              <span className="text-xs sm:text-sm">{playlist.items?.length || 0} items</span>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <ShareButton />
-            <LikeButton
-              playlistId={playlist.id}
-              initialLikes={playlist.likes || 0}
-              initialLikedBy={playlist.likedBy || []}
-            />
+            {isPublic && <ShareButton />}
+            {isPublic && (
+              <LikeButton
+                playlistId={playlist.id}
+                initialLikes={playlist.likes || 0}
+                initialLikedBy={playlist.likedBy || []}
+              />
+            )}
             <EditPlaylistButton
               playlistId={playlist.id}
               authorId={playlist.authorId}
@@ -89,7 +134,7 @@ export function PlaylistDetails({
           </div>
         </div>
 
-        <div className="p-6 text-lg leading-relaxed border bg-slate-50 rounded-2xl border-slate-100 text-slate-700">
+        <div className="p-4 text-sm sm:text-xl leading-relaxed border bg-slate-100 rounded-2xl border-slate-200 text-slate-700">
           {playlist.description}
         </div>
       </motion.div>
@@ -99,7 +144,7 @@ export function PlaylistDetails({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className="flex items-center gap-2 text-2xl font-bold text-slate-900"
+          className="flex items-center gap-2 text-xl font-bold text-slate-900"
         >
           <BookOpen className="w-6 h-6 text-indigo-600" />
           The Syllabus

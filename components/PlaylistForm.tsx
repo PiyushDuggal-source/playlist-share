@@ -44,6 +44,7 @@ export function PlaylistForm({ initialData }: PlaylistFormProps) {
     initialData?.description || ""
   );
   const [items, setItems] = useState<PlaylistItem[]>(initialData?.items || []);
+  const [isPublic, setIsPublic] = useState(initialData?.isPublic ?? true);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -128,6 +129,7 @@ export function PlaylistForm({ initialData }: PlaylistFormProps) {
         authorId: user.uid,
         authorName: user.displayName || "Anonymous",
         authorLevel: userProfile?.level || 1,
+        isPublic,
       };
 
       if (initialData) {
@@ -172,6 +174,26 @@ export function PlaylistForm({ initialData }: PlaylistFormProps) {
             onChange={(e) => setDescription(e.target.value)}
             placeholder="What's this course about? Any tips for passing?"
           />
+        </div>
+
+        <div className="grid gap-2">
+          <label className="text-sm font-semibold text-slate-900">
+            Visibility
+          </label>
+          <select
+            className="flex w-full h-12 px-4 py-2 text-base transition-all bg-white border rounded-lg border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            value={isPublic ? "public" : "private"}
+            onChange={(e) => setIsPublic(e.target.value === "public")}
+          >
+            <option value="public">Public — visible to everyone</option>
+            <option value="private">
+              Private — only you can view this playlist
+            </option>
+          </select>
+          <p className="text-sm text-slate-500">
+            Private playlists stay in your profile dashboard. Switch to public
+            to let others discover and follow along.
+          </p>
         </div>
       </div>
 

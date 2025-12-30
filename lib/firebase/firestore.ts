@@ -17,6 +17,18 @@ import {
 import { db } from "./config";
 import { Playlist, UserProfile } from "@/types";
 
+const hydratePlaylist = (id: string, data: any): Playlist => {
+  const normalized = {
+    ...data,
+    isPublic: data?.isPublic ?? true,
+  };
+
+  return {
+    id,
+    ...normalized,
+  } as Playlist;
+};
+
 // Collection References
 export const playlistsCollection = collection(db, "playlists");
 export const usersCollection = collection(db, "users");
@@ -52,26 +64,28 @@ export const getAllUsers = async (): Promise<UserProfile[]> => {
 export const getAllPlaylists = async (): Promise<Playlist[]> => {
   const q = query(playlistsCollection, orderBy("createdAt", "desc"));
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(
-    (doc) => ({ id: doc.id, ...doc.data() } as Playlist)
-  );
+  return snapshot.docs
+    .map((docSnapshot) => hydratePlaylist(docSnapshot.id, docSnapshot.data()))
+    .filter((playlist) => playlist.isPublic);
 };
 
 export const getUserPlaylists = async (
-  authorId: string
+  authorId: string,
+  options: { includePrivate?: boolean } = {}
 ): Promise<Playlist[]> => {
+  const { includePrivate = false } = options;
   const q = query(playlistsCollection, where("authorId", "==", authorId));
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(
-    (doc) => ({ id: doc.id, ...doc.data() } as Playlist)
-  );
+  return snapshot.docs
+    .map((docSnapshot) => hydratePlaylist(docSnapshot.id, docSnapshot.data()))
+    .filter((playlist) => includePrivate || playlist.isPublic);
 };
 
 export const getPlaylist = async (id: string): Promise<Playlist | null> => {
   const docRef = doc(db, "playlists", id);
   const docSnap = await getDoc(docRef);
   if (docSnap.exists()) {
-    return { id: docSnap.id, ...docSnap.data() } as Playlist;
+    return hydratePlaylist(docSnap.id, docSnap.data());
   }
   return null;
 };
@@ -96,6 +110,7 @@ export const createPlaylist = async (
 ) => {
   const docRef = await addDoc(playlistsCollection, {
     ...playlist,
+    isPublic: playlist.isPublic ?? true,
     likes: 0,
     likedBy: [],
     createdAt: Date.now(),
@@ -106,8 +121,10 @@ export const createPlaylist = async (
 
 export const updatePlaylist = async (id: string, data: Partial<Playlist>) => {
   const docRef = doc(db, "playlists", id);
+  const { isPublic, ...rest } = data;
   await updateDoc(docRef, {
-    ...data,
+    ...rest,
+    ...(typeof isPublic === "boolean" ? { isPublic } : {}),
     updatedAt: Date.now(),
   });
 };

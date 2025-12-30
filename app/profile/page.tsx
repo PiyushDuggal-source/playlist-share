@@ -36,7 +36,7 @@ export default function ProfilePage() {
 
   const loadPlaylists = async (uid: string) => {
     try {
-      const data = await getUserPlaylists(uid);
+      const data = await getUserPlaylists(uid, { includePrivate: true });
       setPlaylists(data);
     } catch (error) {
       console.error("Error loading playlists", error);
@@ -69,14 +69,14 @@ export default function ProfilePage() {
   if (!user) return null;
 
   return (
-    <div className="space-y-12 container mx-auto px-4 py-10">
+    <div className="container px-4 py-10 mx-auto space-y-12">
       <ProfileEditor user={user} />
 
       <div className="space-y-6">
-        <div className="flex items-center justify-between border-b border-slate-200 pb-4">
+        <div className="flex items-center justify-between pb-4 border-b border-slate-200">
           <div>
             <h2 className="text-2xl font-bold text-slate-900">Your Stash</h2>
-            <p className="text-slate-600 mt-1">
+            <p className="mt-1 text-slate-600">
               The courses you're teaching the world (or just saving for later).
             </p>
           </div>
@@ -86,11 +86,11 @@ export default function ProfilePage() {
         </div>
 
         {playlists.length === 0 ? (
-          <div className="text-center py-16 bg-white rounded-xl border border-dashed border-slate-300">
+          <div className="py-16 text-center bg-white border border-dashed rounded-xl border-slate-300">
             <p className="text-lg font-medium text-slate-900">
               You haven't created anything yet.
             </p>
-            <p className="text-slate-500 mt-1">
+            <p className="mt-1 text-slate-500">
               The world is waiting for your genius.
             </p>
             <div className="mt-6">
@@ -104,22 +104,34 @@ export default function ProfilePage() {
             {playlists.map((playlist) => (
               <Card
                 key={playlist.id}
-                className="flex flex-col hover:shadow-md transition-shadow"
+                className="flex flex-col transition-shadow hover:shadow-md"
               >
                 <CardHeader>
-                  <CardTitle className="line-clamp-1">
-                    {playlist.name}
-                  </CardTitle>
+                  <div className="flex items-start justify-between gap-2">
+                    <CardTitle className="line-clamp-1">
+                      {playlist.name}
+                    </CardTitle>
+                    <Badge
+                      variant="outline"
+                      className={
+                        playlist.isPublic
+                          ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                          : "border-amber-200 bg-amber-50 text-amber-700"
+                      }
+                    >
+                      {playlist.isPublic ? "Public" : "Private"}
+                    </Badge>
+                  </div>
                   <CardDescription className="line-clamp-2">
                     {playlist.description}
                   </CardDescription>
                 </CardHeader>
-                <CardDescription className="px-6 pb-4 text-sm text-slate-600 flex flex-wrap gap-2 items-center mt-auto">
+                <CardDescription className="flex flex-wrap items-center gap-2 px-6 pb-4 mt-auto text-sm text-slate-600">
                   <Badge variant="secondary">
                     {playlist.items?.length || 0} items
                   </Badge>
                 </CardDescription>
-                <div className="px-6 pb-6 flex gap-2">
+                <div className="flex gap-2 px-6 pb-6">
                   <Link href={`/playlist/${playlist.id}`} className="flex-1">
                     <Button variant="outline" className="w-full" size="sm">
                       View
@@ -130,7 +142,7 @@ export default function ProfilePage() {
                     className="flex-1"
                   >
                     <Button variant="outline" className="w-full" size="sm">
-                      <Pencil className="mr-2 h-4 w-4" /> Edit
+                      <Pencil className="w-4 h-4 mr-2" /> Edit
                     </Button>
                   </Link>
                   <Button
@@ -138,7 +150,7 @@ export default function ProfilePage() {
                     size="sm"
                     onClick={() => handleDelete(playlist.id)}
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
               </Card>

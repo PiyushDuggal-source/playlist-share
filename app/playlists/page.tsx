@@ -3,7 +3,6 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getAllPlaylists } from "@/lib/firebase/firestore";
-import { Playlist } from "@/types";
 import {
   Card,
   CardHeader,
@@ -11,7 +10,6 @@ import {
   CardDescription,
 } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
 import { AuthGateButton } from "@/components/AuthGateButton";
 import { ShareButton } from "@/components/ShareButton";
 import { LevelBadge } from "@/components/LevelBadge";
@@ -73,14 +71,14 @@ export default function PlaylistsPage() {
               <Link key={playlist.id} href={`/playlist/${playlist.id}`}>
                 <Card className="h-full hover:-translate-y-1 hover:shadow-lg transition-all duration-200 cursor-pointer flex flex-col">
                   <CardHeader>
-                    <CardTitle className="line-clamp-1">
+                    <CardTitle className="line-clamp-2">
                       {playlist.name}
                     </CardTitle>
                     <CardDescription className="line-clamp-2">
                       {playlist.description}
                     </CardDescription>
                   </CardHeader>
-                  <CardDescription className="px-6 pb-6 text-sm text-slate-600 flex flex-wrap gap-2 items-center mt-auto">
+                  <CardDescription className="px-6 pb-6 text-xs text-slate-600 flex flex-wrap gap-2 items-center mt-auto">
                     <Badge variant="secondary">
                       {playlist.items?.length || 0} items
                     </Badge>
