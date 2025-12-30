@@ -62,7 +62,7 @@ export function PlaylistForm({ initialData }: PlaylistFormProps) {
         title: "",
         type: "video",
         url: "",
-        notes: "",
+        description: "",
       },
     ]);
 
@@ -113,13 +113,18 @@ export function PlaylistForm({ initialData }: PlaylistFormProps) {
 
     setLoading(true);
     try {
+      const normalizedItems = items.map(({ notes, ...rest }) => ({
+        ...rest,
+        description: rest.description || notes || "",
+      }));
+
       // Fetch user profile to get the level
       const userProfile = await getUserProfile(user.uid);
 
       const playlistData = {
         name,
         description,
-        items,
+        items: normalizedItems,
         authorId: user.uid,
         authorName: user.displayName || "Anonymous",
         authorLevel: userProfile?.level || 1,
@@ -150,7 +155,7 @@ export function PlaylistForm({ initialData }: PlaylistFormProps) {
           </label>
           <input
             required
-            className="flex h-12 w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-base placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+            className="flex w-full h-12 px-4 py-2 text-base transition-all bg-white border rounded-lg border-slate-300 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g., CS 101: Intro to Computer Science"
@@ -180,7 +185,7 @@ export function PlaylistForm({ initialData }: PlaylistFormProps) {
             size="sm"
             className="gap-2"
           >
-            <Plus className="h-4 w-4" /> Add Resource
+            <Plus className="w-4 h-4" /> Add Resource
           </Button>
         </div>
 
@@ -205,7 +210,7 @@ export function PlaylistForm({ initialData }: PlaylistFormProps) {
             </SortableContext>
           </DndContext>
           {items.length === 0 && (
-            <div className="text-center py-12 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50">
+            <div className="py-12 text-center border-2 border-dashed border-slate-200 rounded-xl bg-slate-50">
               <p className="text-slate-500">
                 No items yet. Add your first resource.
               </p>

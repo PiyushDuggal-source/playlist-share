@@ -40,36 +40,36 @@ export function SortablePlaylistItem({
       style={style}
       className="relative"
     >
-      <Card className="border-slate-200 shadow-sm">
+      <Card className="shadow-sm border-slate-200">
         <CardContent className="p-4 space-y-4">
           <div className="flex items-start gap-4">
             <div
-              className="mt-3 text-slate-300 cursor-move touch-none"
+              className="mt-3 cursor-move text-slate-300 touch-none"
               {...attributes}
               {...listeners}
             >
-              <GripVertical className="h-5 w-5" />
+              <GripVertical className="w-5 h-5" />
             </div>
             <div className="flex-grow space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                  <label className="text-xs font-semibold tracking-wider uppercase text-slate-700">
                     Title
                   </label>
                   <input
                     required
-                    className="flex h-10 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                    className="flex w-full h-10 px-3 py-2 text-sm transition-all bg-white border rounded-lg border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     value={item.title}
                     onChange={(e) => onUpdate(item.id, "title", e.target.value)}
                     placeholder="e.g. Lecture 1: Intro"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                  <label className="text-xs font-semibold tracking-wider uppercase text-slate-700">
                     Type
                   </label>
                   <select
-                    className="flex h-10 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                    className="flex w-full h-10 px-3 py-2 text-sm transition-all bg-white border rounded-lg border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     value={item.type}
                     onChange={(e) =>
                       onUpdate(
@@ -81,29 +81,40 @@ export function SortablePlaylistItem({
                   >
                     <option value="video">Video</option>
                     <option value="document">Document</option>
+                    <option value="link">Link</option>
+                    <option value="note">Note</option>
                   </select>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
-                  URL
-                </label>
-                <input
-                  required
-                  type="url"
-                  className="flex h-10 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                  value={item.url}
-                  onChange={(e) => onUpdate(item.id, "url", e.target.value)}
-                  placeholder="https://youtube.com/..."
-                />
-              </div>
+              {item.type !== "note" && (
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold tracking-wider uppercase text-slate-700">
+                    URL
+                  </label>
+                  <input
+                    required={
+                      item.type === "video" ||
+                      item.type === "document" ||
+                      item.type === "link"
+                    }
+                    type="url"
+                    className="flex w-full h-10 px-3 py-2 text-sm transition-all bg-white border rounded-lg border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    value={item.url || ""}
+                    onChange={(e) => onUpdate(item.id, "url", e.target.value)}
+                    placeholder="https://youtube.com/..."
+                  />
+                </div>
+              )}
 
-              <div>
+              <div className="space-y-2">
+                <label className="text-xs font-semibold tracking-wider uppercase text-slate-700">
+                  Description
+                </label>
                 <MarkdownEditor
-                  value={item.notes || ""}
-                  onChange={(v) => onUpdate(item.id, "notes", v || "")}
-                  placeholder="Add context: 'Watch from 10:00' or 'Read pages 5-10'"
+                  value={item.description || item.notes || ""}
+                  onChange={(v) => onUpdate(item.id, "description", v ? v : "")}
+                  placeholder="Add context, summaries, timestamps, or key takeaways"
                 />
               </div>
             </div>
@@ -114,7 +125,7 @@ export function SortablePlaylistItem({
               className="text-slate-400 hover:text-red-500 hover:bg-red-50"
               onClick={() => onRemove(item.id)}
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="w-4 h-4" />
             </Button>
           </div>
         </CardContent>

@@ -4,13 +4,7 @@ import { Playlist } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import { getPlaylist } from "@/lib/firebase/firestore";
 import { Card, CardContent } from "@/components/ui/Card";
-import {
-  ExternalLink,
-  FileText,
-  Video,
-  PlayCircle,
-  BookOpen,
-} from "lucide-react";
+import { ExternalLink, FileText, PlayCircle, BookOpen } from "lucide-react";
 import { EditPlaylistButton } from "@/components/EditPlaylistButton";
 import { LikeButton } from "@/components/LikeButton";
 import { ShareButton } from "@/components/ShareButton";
@@ -19,6 +13,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
 import dynamic from "next/dynamic";
+import { getYouTubeEmbedUrl } from "@/lib/utils";
 
 const MarkdownPreview = dynamic(
   () => import("@uiw/react-md-editor").then((mod) => mod.default.Markdown),
@@ -40,19 +35,19 @@ export function PlaylistDetails({
     initialData: initialPlaylist,
   });
   return (
-    <div className="space-y-8 max-w-4xl mx-auto py-8 px-4">
+    <div className="max-w-4xl px-4 py-8 mx-auto space-y-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="space-y-6"
       >
-        <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+        <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Badge
                 variant="secondary"
-                className="bg-indigo-50 text-indigo-700"
+                className="text-indigo-700 bg-indigo-50"
               >
                 Course Playlist
               </Badge>
@@ -60,16 +55,16 @@ export function PlaylistDetails({
                 Updated {new Date().toLocaleDateString()}
               </span>
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">
+            <h1 className="text-3xl font-bold tracking-tight md:text-4xl text-slate-900">
               {playlist.name}
             </h1>
             <div className="flex items-center gap-2 text-slate-600">
-              <div className="h-6 w-6 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600">
+              <div className="flex items-center justify-center w-6 h-6 text-xs font-bold rounded-full bg-slate-200 text-slate-600">
                 {playlist.authorName?.charAt(0).toUpperCase()}
               </div>
               <Link
                 href={`/users/${playlist.authorId}`}
-                className="font-medium hover:text-indigo-600 hover:underline flex items-center gap-1"
+                className="flex items-center gap-1 font-medium hover:text-indigo-600 hover:underline"
               >
                 By {playlist.authorName}
                 {playlist.authorLevel && (
@@ -94,7 +89,7 @@ export function PlaylistDetails({
           </div>
         </div>
 
-        <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100 text-lg text-slate-700 leading-relaxed">
+        <div className="p-6 text-lg leading-relaxed border bg-slate-50 rounded-2xl border-slate-100 text-slate-700">
           {playlist.description}
         </div>
       </motion.div>
@@ -104,58 +99,70 @@ export function PlaylistDetails({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className="text-2xl font-bold text-slate-900 flex items-center gap-2"
+          className="flex items-center gap-2 text-2xl font-bold text-slate-900"
         >
-          <BookOpen className="h-6 w-6 text-indigo-600" />
+          <BookOpen className="w-6 h-6 text-indigo-600" />
           The Syllabus
         </motion.h2>
 
         <div className="space-y-4">
-          {playlist.items?.map((item, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 + index * 0.05, duration: 0.4 }}
-            >
-              <Card className="group hover:shadow-md transition-all duration-200 border-slate-200 hover:border-indigo-200">
-                <CardContent className="p-4 flex items-start gap-4">
-                  <div className="mt-1 shrink-0">
-                    {item.type === "video" ? (
-                      <div className="h-10 w-10 rounded-full bg-red-50 flex items-center justify-center">
-                        <PlayCircle className="h-5 w-5 text-red-500" />
+          {playlist.items?.map((item, index) => {
+            const embedUrl = getYouTubeEmbedUrl(item.url);
+
+            return (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 + index * 0.05, duration: 0.4 }}
+              >
+                <Card className="transition-all duration-200 group hover:shadow-md border-slate-200 hover:border-indigo-200">
+                  <CardContent className="p-4 space-y-4">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="flex items-center min-w-0 gap-3 sm:items-start">
+                        {item.type === "video" ? (
+                          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-red-50">
+                            <PlayCircle className="w-5 h-5 text-red-500" />
+                          </div>
+                        ) : item.type === "document" ? (
+                          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-50">
+                            <FileText className="w-5 h-5 text-blue-500" />
+                          </div>
+                        ) : item.type === "link" ? (
+                          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-emerald-50">
+                            <ExternalLink className="w-5 h-5 text-emerald-600" />
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-indigo-50">
+                            <BookOpen className="w-5 h-5 text-indigo-600" />
+                          </div>
+                        )}
+                        <h3 className="flex-1 min-w-0 text-lg font-semibold transition-colors text-slate-900 group-hover:text-indigo-600">
+                          {item.title}
+                        </h3>
                       </div>
-                    ) : (
-                      <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center">
-                        <FileText className="h-5 w-5 text-blue-500" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-grow space-y-1 min-w-0">
-                    <div className="flex items-start justify-between gap-4">
-                      <h3 className="font-semibold text-slate-900 text-lg group-hover:text-indigo-600 transition-colors">
-                        {item.title}
-                      </h3>
-                      <a
-                        href={item.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-slate-400 hover:text-slate-900 transition-colors p-1"
-                      >
-                        <ExternalLink className="h-4 w-4" />
-                      </a>
+                      {item.url && (
+                        <a
+                          href={item.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="self-start hidden p-1 transition-colors sm:block text-slate-400 hover:text-slate-900 sm:self-auto"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                        </a>
+                      )}
                     </div>
 
-                    {item.notes && (
+                    {(item.description || item.notes) && (
                       <div
-                        className="text-sm text-slate-600 bg-slate-50 p-3 rounded-lg mt-2 border border-slate-100"
+                        className="p-3 text-sm border rounded-lg text-slate-600 bg-slate-50 border-slate-100"
                         data-color-mode="light"
                       >
-                        <span className="font-semibold text-slate-500 text-xs uppercase tracking-wider block mb-1">
-                          Notes
+                        <span className="block mb-1 text-xs font-semibold tracking-wider uppercase text-slate-500">
+                          Description
                         </span>
                         <MarkdownPreview
-                          source={item.notes}
+                          source={item.description || item.notes || ""}
                           style={{
                             backgroundColor: "transparent",
                           }}
@@ -163,25 +170,40 @@ export function PlaylistDetails({
                       </div>
                     )}
 
-                    <div className="pt-2">
-                      <a
-                        href={item.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm font-medium text-indigo-600 hover:text-indigo-700 hover:underline inline-flex items-center gap-1"
-                      >
-                        Open Resource <ExternalLink className="h-3 w-3" />
-                      </a>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
+                    {embedUrl && (
+                      <div className="relative w-full overflow-hidden rounded-xl aspect-video">
+                        <iframe
+                          src={embedUrl}
+                          title={`YouTube video: ${item.title}`}
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                          allowFullScreen
+                          loading="lazy"
+                          className="absolute inset-0 w-full h-full"
+                        />
+                      </div>
+                    )}
+
+                    {item.url && (
+                      <div className="pt-1">
+                        <a
+                          href={item.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-sm font-medium text-indigo-600 hover:text-indigo-700 hover:underline"
+                        >
+                          Open Resource <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </motion.div>
+            );
+          })}
 
           {(!playlist.items || playlist.items.length === 0) && (
-            <div className="text-center py-12 bg-slate-50 rounded-xl border border-dashed border-slate-200">
-              <p className="text-slate-500 italic">
+            <div className="py-12 text-center border border-dashed bg-slate-50 rounded-xl border-slate-200">
+              <p className="italic text-slate-500">
                 This course is empty. The professor must be late.
               </p>
             </div>

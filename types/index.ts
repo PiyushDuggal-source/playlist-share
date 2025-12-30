@@ -1,11 +1,12 @@
-export type PlaylistItemType = "video" | "document";
+export type PlaylistItemType = "video" | "document" | "link" | "note";
 
 export interface PlaylistItem {
   id: string;
-  title: string;
+  title: string; // display name / title
   type: PlaylistItemType;
-  url: string;
-  notes?: string;
+  url?: string; // optional: only required for items like video/link/document
+  description?: string; // short description or summary
+  notes?: string; // freeform user notes (editor)
 }
 
 export interface Playlist {
